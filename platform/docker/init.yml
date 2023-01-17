@@ -1,0 +1,42 @@
+version: "3.9"
+
+services:
+
+  wait-for-configserver:
+    image: atkrad/wait4x
+    depends_on:
+      - config-server
+    command: http http://configserver:8070 -t 2m -i 2s
+    networks:
+      backend:
+        aliases:
+          - "wait-for-configserver"
+  wait-for-keycloak:
+    image: atkrad/wait4x
+    depends_on:
+      - keycloak
+    command: http http://keycloak:8080 -t 3m -i 5s
+    networks:
+      backend:
+        aliases:
+          - "wait-for-keycloak"
+  medusa-vault-import:
+    image: ghcr.io/jonasvinther/medusa
+    volumes:
+      - ../vault/:/tmp/input/
+    environment:
+      VAULT_ADDR: http://vault:8200
+      VAULT_TOKEN: root
+      VAULT_SKIP_VERIFY: true
+    command: import secret ./tmp/input/import-secrets.json
+    depends_on:
+      - vault
+    networks:
+      backend:
+        aliases:
+          - "medusa-vault-import"
+
+networks:
+  backend:
+    name: backend
+    driver: bridge

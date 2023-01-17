@@ -1,0 +1,74 @@
+version: "3.9"
+
+services:
+
+  prometheus:
+    image: prom/prometheus:v2.39.0
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ../prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - backend
+
+  grafana:
+    image: grafana/grafana:9.2.3
+    container_name: grafana
+    depends_on:
+      - loki
+      - prometheus
+      - tempo
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=user
+      - GF_SECURITY_ADMIN_PASSWORD=password
+    volumes:
+      - ../grafana/datasource.yml:/etc/grafana/provisioning/datasources/datasource.yml
+      - ../grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ../grafana/grafana.ini:/etc/grafana/grafana.ini
+    networks:
+      - backend
+
+  loki:
+    image: grafana/loki:2.6.1
+    container_name: loki
+    depends_on:
+      - fluent-bit
+    ports:
+      - "3100:3100"
+    networks:
+      - backend
+
+  fluent-bit:
+    image: grafana/fluent-bit-plugin-loki:2.6.1-amd64
+    container_name: fluent-bit
+    ports:
+      - "24224:24224"
+    environment:
+      - LOKI_URL=http://loki:3100/loki/api/v1/push
+    volumes:
+      - ../fluent-bit/fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf
+    networks:
+      - backend
+
+  tempo:
+    image: grafana/tempo:1.5.0
+    container_name: tempo
+    command: -config.file /etc/tempo-config.yml
+    ports:
+      - "3200:3200"     # Tempo
+      - "4317:4317"     # OTLP
+      - "9411:9411"     # Zipkin
+    volumes:
+      - ../tempo/tempo.yml:/etc/tempo-config.yml
+    networks:
+      - backend
+
+networks:
+  backend:
+    name: backend
+    driver: bridge

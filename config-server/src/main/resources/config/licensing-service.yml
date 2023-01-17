@@ -1,0 +1,95 @@
+#server.port: 7081
+server.port: 0
+spring:
+  jpa:
+    hibernate:
+    ddl-auto: none
+    database: POSTGRESQL
+    show-sql: true
+  sql.init.platform: postgres
+  datasource:
+    url: jdbc:postgresql://localhost:5432/postgres
+#    username: postgres
+#    password: postgres
+    username: ${postgres.username}
+    password: ${postgres.password}
+
+  cloud:
+    stream:
+      default-binder: kafka
+      function.definition: organizationChangeState
+      bindings.organizationChangeState-in-0:
+        group: vvw
+        destination: org-change-events
+      kafka:
+        binder:
+          brokers: ${KAFKA_BROKER:localhost}
+          zkNodes: ${ZOOKEEPER_NODE:localhost}
+          default-broker-port: ${BROKER_PORT:29092}
+          autoAddPartitions: true
+          minPartitionCount: 2
+          enableObservation: true
+          configuration:
+            isolation.level: read_committed
+            partition.assignment.strategy: org.apache.kafka.clients.consumer.RoundRobinAssignor
+        bindings:
+          organizationChangeState-in-0.consumer:
+            autoRebalanceEnabled: true
+            startOffset: earliest
+            resetOffsets: false
+  #         startOffset: latest
+  #         resetOffsets: true
+
+spring.security.oauth2.resourceserver.jwt.issuer-uri: ${KEYCLOAK_URL:http://localhost:8080}/realms/vvw
+
+management:
+  endpoint.health.show-details: ALWAYS
+  metrics.export:
+    prometheus.enabled: true
+    rsocket.enabled: true
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      licenseService:
+        register-health-indicator: true
+        sliding-window-size: 5 #instead of ringBufferSizeInClosedState
+        permitted-number-of-calls-in-half-open-state: 3 #instead of ringBufferSizeInHalfOpenState
+        wait-duration-in-open-state: 10s
+        failure-rate-threshold: 50
+        record-exceptions:
+          - org.springframework.web.client.HttpServerErrorException
+          - java.io.IOException
+          - java.util.concurrent.TimeoutException
+          - org.springframework.web.client.ResourceAccessException
+      organizationService:
+        register-health-indicator: true
+        sliding-window-size: 6
+        permitted-number-of-calls-in-half-open-state: 4
+        wait-duration-in-open-state: 20s
+        failure-rate-threshold: 60
+  bulkhead:
+    instances:
+      bulkheadLicensingService:
+        max-wait-duration: 10ms
+        max-concurrent-calls: 20
+  thread-pool-bulkhead:
+    instances:
+      bulkheadLicenseService:
+        max-thread-pool-size: 1
+        core-thread-pool-size: 1
+        queue-capacity: 1
+        keep-alive-duration: 20ms
+  retry:
+    instances:
+      retryLicensingService:
+        max-attempts: 5
+        wait-duration: 10000
+        retry-exceptions:
+          - java.util.concurrent.TimeoutException
+  ratelimiter:
+    instances:
+      licensingService:
+        timeout-duration: 3000ms
+        limit-refresh-period: 500
+        limit-for-period: 10

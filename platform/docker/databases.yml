@@ -1,0 +1,40 @@
+version: "3.9"
+
+services:
+
+  redis:
+    image: redis:7.0.5-alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+    networks:
+      backend:
+        aliases:
+          - "redis"
+
+  postgres:
+    image: postgres:15.1-alpine
+    container_name: postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    volumes:
+      - ../postgres/init.sql:/docker-entrypoint-initdb.d/1-init.sql
+      - ../postgres/data.sql:/docker-entrypoint-initdb.d/2-data.sql
+    networks:
+      backend:
+        aliases:
+          - "postgres"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -h 127.0.0.1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+networks:
+  backend:
+    name: backend
+    driver: bridge

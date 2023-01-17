@@ -1,0 +1,132 @@
+version: "3.9"
+
+services:
+  # Applications
+  config-server:
+    image: vvw/config-server:0.0.1-SNAPSHOT
+    container_name: config-server
+    ports:
+      - "8070:8070"
+    environment:
+      SERVER_PORT: 8070
+      spring.cloud.config.server.vault.host: vault
+    depends_on:
+      medusa-vault-import:
+        condition: service_completed_successfully
+    networks:
+      backend:
+        aliases:
+          - "configserver"
+  eureka-server:
+    image: vvw/eureka-server:0.0.1-SNAPSHOT
+    container_name: eureka-server
+    ports:
+      - "8071:8071"
+    environment:
+      SERVER_PORT: 8071
+    env_file:
+      - './variables.env'
+    depends_on:
+      wait-for-configserver:
+        condition: service_completed_successfully
+    networks:
+      backend:
+        aliases:
+          - "eurekaserver"
+  gateway-server:
+    image: vvw/gateway-server:0.0.1-SNAPSHOT
+    container_name: gateway-server
+    ports:
+      - "8072:8072"
+    environment:
+      SERVER_PORT: 8072
+    env_file:
+      - './variables.env'
+    links:
+      - "keycloak:host.docker.internal"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      wait-for-configserver:
+        condition: service_completed_successfully
+      wait-for-keycloak:
+        condition: service_completed_successfully
+      eureka-server:
+        condition: service_started
+      keycloak:
+        condition: service_started
+      fluent-bit:
+        condition: service_started
+    logging:
+      driver: fluentd
+      options:
+        fluentd-address: 127.0.0.1:24224
+    networks:
+      backend:
+        aliases:
+          - "gatewayserver"
+  licensing-service:
+    image: vvw/licensing-service:0.0.1-SNAPSHOT
+    container_name: licensing-service
+    env_file:
+      - './variables.env'
+#    environment:
+#      SERVER_PORT: 8081
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    logging:
+      driver: fluentd
+      options:
+        fluentd-address: 127.0.0.1:24224
+    depends_on:
+      wait-for-configserver:
+        condition: service_completed_successfully
+      eureka-server:
+        condition: service_started
+      postgres:
+        condition: service_started
+      kafka:
+        condition: service_started
+      fluent-bit:
+        condition: service_started
+#    ports:
+#      - "8081:8081"
+    networks:
+      backend:
+        aliases:
+          - " licensingservice"
+  organization-service:
+    image: vvw/organization-service:0.0.1-SNAPSHOT
+    container_name: organization-service
+    env_file:
+      - './variables.env'
+#    environment:
+#      SERVER_PORT: 8082
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    logging:
+      driver: fluentd
+      options:
+        fluentd-address: 127.0.0.1:24224
+    depends_on:
+      wait-for-configserver:
+        condition: service_completed_successfully
+      eureka-server:
+        condition: service_started
+      postgres:
+        condition: service_started
+      kafka:
+        condition: service_started
+      fluent-bit:
+        condition: service_started
+#    ports:
+#      - "8082:8082"
+    networks:
+      backend:
+        aliases:
+          - "organizationservice"
+
+networks:
+  backend:
+    name: backend
+    driver: bridge

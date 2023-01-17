@@ -1,0 +1,15 @@
+spring:
+  application.name: licensing-service
+  profiles.active: dev
+  config:
+    import: configserver:${SPRING_CLOUD_CONFIG_URI:http://localhost:7070}
+    openfeign.oauth2.enabled: true
+  cloud:
+    config:
+      fail-fast: true
+      request-connect-timeout: 20000
+      retry:
+        initialInterval: 3000
+        multiplier: 1.3
+        maxInterval: 10000
+        maxAttempts: 20

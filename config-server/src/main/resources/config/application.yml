@@ -1,0 +1,26 @@
+eureka:
+  instance:
+    preferIpAddress: true
+    leaseRenewalIntervalInSeconds: 5
+    leaseExpirationDurationInSeconds: 5
+  client:
+    fetch-registry: true
+    register-with-eureka: true
+    registryFetchIntervalSeconds: 5
+    initialInstanceInfoReplicationIntervalSeconds: 5
+    serviceUrl.defaultZone: ${EUREKA_SERVER:http://localhost:7071/eureka/}
+
+logging:
+  level:
+    com.netflix: WARN
+    org.springframework.web: WARN
+    com.vvw: DEBUG
+  pattern.level: "%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]"
+
+management:
+  endpoints.web.exposure.include: "*"
+  metrics.tags.application: ${spring.application.name}
+  zipkin.tracing.endpoint: http://localhost:9412/api/v2/spans
+  tracing:
+    enabled: true
+    sampling.probability: 1.0

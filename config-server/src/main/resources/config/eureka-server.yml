@@ -1,0 +1,9 @@
+server.port: 7071
+eureka:
+  server:
+    waitTimeInMsWhenSyncEmpty: 0
+    response-cache-update-interval-ms: 5000
+  client:
+    fetch-registry: false
+    register-with-eureka: false
+    serviceUrl.defaultZone: ${EUREKA_SERVER:http://localhost:7070/eureka/}

@@ -1,0 +1,57 @@
+#server.port: 7082
+server.port: 0
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: none
+    database: POSTGRESQL
+    show-sql: true
+  sql.init.platform: postgres
+  datasource:
+    url: jdbc:postgresql://localhost:5432/postgres
+#   username: postgres
+#   password: postgres
+    username: ${postgres.username}
+    password: ${postgres.password}
+
+  cloud:
+    function:
+      definition: organizationSupplier
+      ineligible-definitions: webConvertersCustomizer
+    stream:
+      default-binder: kafka
+      default.consumer.concurrency: 1
+      bindings.organizationSupplier-out-0.destination: org-change-events
+      kafka:
+        bindings.organizationSupplier-out-0.producer.configuration.partitioner.class: org.apache.kafka.clients.producer.RoundRobinPartitioner
+        binder:
+          brokers: ${KAFKA_BROKER:localhost}
+          zkNodes: ${ZOOKEEPER_NODE:localhost}
+          default-broker-port: ${BROKER_PORT:29092}
+          replication-factor: 1
+          autoAddPartitions: true
+          minPartitionCount: 4
+          enableObservation: true
+          configuration.isolation.level: read_committed
+          producer-properties:
+            partitioner.ignore.keys: true
+            partitioner.class: org.apache.kafka.clients.producer.RoundRobinPartitioner
+            partitioner.adaptive.partitioning.enable: false
+          transaction:
+            transaction-id-prefix: organization-${SPRING_PROFILES_ACTIVE:${spring.profiles.active}}-${random.uuid}
+            producer:
+              partition-count: 2
+              transacted: true
+              topic.replication-factor: 1
+              configuration:
+                partitioner.class: org.apache.kafka.clients.producer.RoundRobinPartitioner
+                retries: 1
+                acks: all
+
+spring.security.oauth2.resourceserver.jwt.issuer-uri: ${KEYCLOAK_URL:http://localhost:8080}/realms/vvw
+
+management:
+  endpoint.health.show-details: ALWAYS
+  metrics.export:
+    prometheus.enabled: true
+    rsocket.enabled: true

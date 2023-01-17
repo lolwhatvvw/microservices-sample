@@ -1,0 +1,41 @@
+server.port: 7070
+
+spring:
+  application.name: config-server
+  profiles.active: git, vault
+  cloud:
+    config:
+      server:
+        native.search-locations: classpath:/config
+        git:
+           uri: https://github.com/letMeStore/configs
+           defaultLabel: main
+#          username: letMeStore
+#          password: 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
+           username: '{cipher}AQBzXErgL4IMI00l6vhfg3eytXLL2Gb2FxAm4Fl8FbXj8Ar3xEp2Rib3iBS8+Y2tHvyft+D0MuTwUCqNySN1p1VKfVx07k46jV8KqtrZh8lJm77VD8YHtuG+Qd3o95/HNQymlBvjw8FNr5DshNyrdyEd3q/l4FkHPoUAWpaYOZMv0ig7xfAi/1RAO+0pcwy579K7Y2PP2VV3+X0nbm2oB1jRkLHBInZKeQAM5OnRptGWzOrq96emWQVTMkzlalwy9S8xuRdW5ermk/GC9UEVBVbEXjOYm59ArXwRz7f2Tm+FiuuJpF6oAoZcrW+uNx69nX6VBvzQ8+TJtOBfB1dJMz1mpfTfWzm5KqD/Oftk0umB3vjPzQkYCjUZEdTqgyOOvfM='
+           password: '{cipher}AQAmChuP6RIJdFRmnRAqO/mmJNSsTDmj56Tz29Y1gjNy8tbEn+VfAcG0t2UjZkHpsGiejuLX5gJWpFHTCY4Fa7zeAktnMK21IXy6Hzm3URvKvt75Yq4QmKMCOeMBsHbkvCgj3C7fRPrt9kk0KMH8YUZjbJamMtAoiTP5vO7nPZSQkD8R1cqyN+ycP4MyW/KtDG4hVa7/34hoTaHmQ3eiP8KQFBQSYU65eyCHgAOq/Jy1mI/dfFWPgghpovkgKsscF5xbXJ2XZJHVOla3uHKrnOJk9yoywrhYMOSTzHjg0ZiKeJJgnm6ueybs+uni5pLdtKRt5TSu5kfBT8wiNSWTcPQPEXMT8VYM2cC9fBD+Mk19O2ipEPBTXuDfr4U4T18H4OXSadw9d1U8UaUpoqnmqR3RlA/TXPe3dijEKdCRhrdhHjIEemn+obhXIjNLGK9Li/McH9CKjnGuf+5FLLRajeTW+JPl2MU+O/JXtCFq3HzJJA=='
+           order: 2
+        vault:
+          port: 8200
+          host: 127.0.0.1
+          kv-version: 2
+#         token: root
+          token: '{cipher}AQCLrloQuj6AgJ+Acu1oFC9lMHmAaHc4792DPdYHhVKs2fQLwwBaL9XZm39JcOMBppox9t8cuSpmNo6PS3A7STpeeuN2dbUV/fEikGThBaknbDwetv7ECBmM6pB5BMPYdpQO3CRL8xHeeREGqfCeWVbVfTWQtBCJADQKqWcHz3K1h8WUbBTEM4LwtIEG0KJKOUmPiayPqoRwtJ+/VD3Qiu6TjfQk6EkqUbJwOrR8MMtSmGQ7dwetlMTg6jfs+BAyw0kcSeMVFuQmkiFm9+1/YLdnSuvL3MrjnpSBYqZg9vJ3MA/9oUC/+v+FrNKjzIC3nZ5tjFc9xa16wDb1SPrQTyC6YO/O+FX/UNkHSp5w1JW1hteUpLpFRrcimAnvo/8Qfx8='
+          authentication: token
+          backend: secret
+          default-key: ""
+          order: 1
+
+logging:
+  level:
+    org.springframework.web.client: TRACE
+
+management.endpoints.web.exposure.include: "*"
+
+encrypt:
+  keyStore:
+    location: classpath:/key/server.jks
+    password: letmein
+    alias: mytestkey
+    secret: letmein
+

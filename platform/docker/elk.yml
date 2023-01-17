@@ -1,0 +1,77 @@
+# If you need to persist data in the event of a container going down, uncomment volumes and make sure that
+# elasticsearch container user has the read and write permission
+#   sudo chown -R 1000:1000 ./platform/elk/esdata1
+version: "3.9"
+
+services:
+
+  elasticsearch:
+    image: elasticsearch:7.7.0
+    container_name: elasticsearch
+    ports:
+      - "9200:9200"
+    environment:
+      - node.name=elasticsearch
+      - discovery.type=single-node
+      - cluster.name=docker-cluster
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx1024m"
+      - xpack.security.enabled=false
+      - xpack.graph.enabled=false
+      - xpack.watcher.enabled=false
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+#    volumes:
+#      - ../elk/esdata1:/usr/share/elasticsearch/data
+    networks:
+      backend:
+        aliases:
+          - "elasticsearch"
+
+  logstash:
+    image: logstash:7.7.0
+    container_name: logstash
+    command: logstash -f /etc/logstash/conf.d/logstash.conf
+    ports:
+      - "5000:5000"
+    volumes:
+      - ../elk/logstash:/etc/logstash/conf.d
+    networks:
+      backend:
+        aliases:
+          - "logstash"
+
+  kibana:
+    image: kibana:7.7.0
+    container_name: kibana
+    ports:
+      - "5601:5601"
+    environment:
+      ELASTICSEARCH_URL: "http://elasticsearch:9200"
+    networks:
+      backend:
+        aliases:
+          - "kibana"
+
+  zipkin:
+    image: openzipkin/zipkin
+    container_name: zipkin
+    depends_on:
+      - elasticsearch
+    ports:
+      - "9412:9411"
+    environment:
+      - "ES_JAVA_OPTS=-Xms512m -Xmx1024m"
+      - STORAGE_TYPE=elasticsearch
+      - "ES_HOSTS=elasticsearch:9200"
+    networks:
+      backend:
+        aliases:
+          - "zipkin"
+
+networks:
+  backend:
+    name: backend
+    driver: bridge

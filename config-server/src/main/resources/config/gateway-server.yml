@@ -1,0 +1,92 @@
+server.port: 7072
+spring:
+  data:
+    redis:
+      host: localhost
+      port: 6379
+  security.oauth2.client:
+    provider.keycloak.issuer-uri: ${KEYCLOAK_URL:http://localhost:8080}/realms/vvw
+    registration:
+      keycloak:
+#       client-id: gateway-server
+#       client-secret: 6Lq1nEdpbxCoVM5BFnYovElrcb7KEQKV
+        client-id: ${oauth2.client-id}
+        client-secret: ${oauth2.client-secret}
+        scope: openid
+        redirect-uri: "{baseUrl}/login/oauth2/code/keycloak"
+        authorization-grant-type: authorization_code
+  cloud:
+    gateway:
+      discovery:
+        locator.enabled: true
+        lower-case-service-id: true
+      default-filters:
+        - SaveSession
+        - TokenRelay
+        - name: RequestRateLimiter
+          args:
+            redis-rate-limiter:
+              replenishRate: 10
+              burstCapacity: 20
+              requestedTokens: 1
+      routes:
+        - id: organization-service
+          uri: lb://organization-service
+          predicates:
+            - Path=/organization/**
+          filters:
+            - RewritePath=/organization/(?<path>.*), /$\{path}
+            - name: CircuitBreaker
+              args:
+                name: organizationService
+                fallbackUri: forward:/organization-fallback
+            - name: Retry
+              args:
+                retries: 3
+                method: GET
+                backoff:
+                  firstBackoff: 50ms
+                  maxBackoff: 500ms
+        - id: licensing-service
+          uri: lb://licensing-service
+          predicates:
+            - Path=/license/**
+          filters:
+            - RewritePath=/license/(?<path>.*), /$\{path}
+            - name: CircuitBreaker
+              args:
+                name: licensingService
+                fallbackUri: forward:/license-fallback
+            - name: Retry
+              args:
+                retries: 3
+                method: GET
+                backoff:
+                  firstBackoff: 50ms
+                  maxBackoff: 500ms
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      organizationService:
+        slidingWindowSize: 10
+        permittedNumberOfCallsInHalfOpenState: 5
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10000
+        registerHealthIndicator: true
+      licensingService:
+        slidingWindowSize: 10
+        permittedNumberOfCallsInHalfOpenState: 5
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10000
+        registerHealthIndicator: true
+  timelimiter:
+    instances:
+      licensingService:
+        timeout-duration: 3s
+        limit-refresh-period: 500
+        limit-for-period: 10
+      organizationService:
+        timeout-duration: 3s
+        limit-refresh-period: 500
+        limit-for-period: 10
