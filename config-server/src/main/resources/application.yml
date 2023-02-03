@@ -11,9 +11,9 @@ spring:
            uri: https://github.com/letMeStore/configs
            defaultLabel: main
 #          username: letMeStore
-#          password: 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
+#          password: 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
            username: '{cipher}AQBzXErgL4IMI00l6vhfg3eytXLL2Gb2FxAm4Fl8FbXj8Ar3xEp2Rib3iBS8+Y2tHvyft+D0MuTwUCqNySN1p1VKfVx07k46jV8KqtrZh8lJm77VD8YHtuG+Qd3o95/HNQymlBvjw8FNr5DshNyrdyEd3q/l4FkHPoUAWpaYOZMv0ig7xfAi/1RAO+0pcwy579K7Y2PP2VV3+X0nbm2oB1jRkLHBInZKeQAM5OnRptGWzOrq96emWQVTMkzlalwy9S8xuRdW5ermk/GC9UEVBVbEXjOYm59ArXwRz7f2Tm+FiuuJpF6oAoZcrW+uNx69nX6VBvzQ8+TJtOBfB1dJMz1mpfTfWzm5KqD/Oftk0umB3vjPzQkYCjUZEdTqgyOOvfM='
-           password: '{cipher}AQAmChuP6RIJdFRmnRAqO/mmJNSsTDmj56Tz29Y1gjNy8tbEn+VfAcG0t2UjZkHpsGiejuLX5gJWpFHTCY4Fa7zeAktnMK21IXy6Hzm3URvKvt75Yq4QmKMCOeMBsHbkvCgj3C7fRPrt9kk0KMH8YUZjbJamMtAoiTP5vO7nPZSQkD8R1cqyN+ycP4MyW/KtDG4hVa7/34hoTaHmQ3eiP8KQFBQSYU65eyCHgAOq/Jy1mI/dfFWPgghpovkgKsscF5xbXJ2XZJHVOla3uHKrnOJk9yoywrhYMOSTzHjg0ZiKeJJgnm6ueybs+uni5pLdtKRt5TSu5kfBT8wiNSWTcPQPEXMT8VYM2cC9fBD+Mk19O2ipEPBTXuDfr4U4T18H4OXSadw9d1U8UaUpoqnmqR3RlA/TXPe3dijEKdCRhrdhHjIEemn+obhXIjNLGK9Li/McH9CKjnGuf+5FLLRajeTW+JPl2MU+O/JXtCFq3HzJJA=='
+           password: '{cipher}AQAJyLpZsMJgY8eC4tR9EaVQblN45WrSE3OCWasA/dnLU6DgTcmYitJaTQjfqLNR4dMsa6nfoNFq+3ERNuT+Ll094taUqvdVqsiFjZ48EjcEv1XNoppBX+xwhkv3b75Oqi85bpCo9dpCwerX8NdZ+PGrsr4D/9VeJV3ryIPw4/hBmUC8sg7mC4jTB8WeMqomyI2hES8sVTVCzqaPEs2b3q2LTxMACWNDK4A7IbLATWNiXmEUfru7M0lPZ5Zit9wssFekiJ/HtcFsJVZb5vQGG0jTu5wq78QXOx30N2jcj23HzoDaEtXP+RzgGd/pkOsbeCOLD3iu6KbstMamep8U1cp4zthiT25Ha0ywjd0S8gcyMSSkSbTvV6HET4+sa7p+flxouRwAII7dmOd1nuNgoNwCLbiOSD2DXxVV6StWpxdk9lvjzDZ7YkvgM1RwinO4cdnj79gxKBC7X0+R0b8otzNhT5zSwIMk5FEjqos6nyF+iw=='
            order: 2
         vault:
           port: 8200
